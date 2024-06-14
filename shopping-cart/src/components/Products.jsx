@@ -1,21 +1,53 @@
 import { useState, useEffect } from 'react';
 
+const images = import.meta.glob('../assets/images/*.jpg');
+
+const loadImages = async () => {
+  const imageMap = {};
+  for (const path in images) {
+    const imageName = path.split('/').pop().replace('.jpg', '');
+    imageMap[imageName] = (await images[path]()).default;
+  }
+  console.log("Image Map:", imageMap); 
+  return imageMap;
+};
+
 const Products = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [quantities, setQuantities] = useState({});
 
   useEffect(() => {
-    fetch("https://fakestoreapi.com/products")
-      .then((res) => res.json())
-      .then((json) => {
-        setProducts(json);
-        setLoading(false);
-      })
-      .catch((err) => {
+    const fetchProducts = async () => {
+      try {
+        const res = await fetch("https://fakestoreapi.com/products");
+        const json = await res.json();
+
+        const imageMap = await loadImages();
+        console.log("Fetched Products:", json);
+        const enhancedProducts = json.map(product => {
+          const imageKey = `image${product.id}`;
+          return {
+            ...product,
+            imageUrl: imageMap[imageKey]
+          };
+        });
+        setProducts(enhancedProducts);
+
+        const initialQuantities = enhancedProducts.reduce((acc, product) => {
+          acc[product.id] = 1;
+          return acc;
+        }, {});
+        setQuantities(initialQuantities);
+      } catch (err) {
         setError(err);
+      } finally {
         setLoading(false);
-      });
+      }
+    };
+
+    fetchProducts();
   }, []);
 
   if (loading) {
@@ -26,16 +58,40 @@ const Products = () => {
     return <div>Error: {error.message}</div>;
   }
 
+  const addToCart = (productId) => {
+    console.log(`Product ${products.find(product => product.id === productId).title} added to cart with quantity ${quantities[productId]}`);
+  }
+
+  const incQ = (productId) => {
+    setQuantities(prevQuantities => ({
+      ...prevQuantities,
+      [productId]: (prevQuantities[productId] || 0) + 1
+    }));
+  }
+
+  const decQ = (productId) => {
+    setQuantities(prevQuantities => ({
+      ...prevQuantities,
+      [productId]: Math.max((prevQuantities[productId] || 1) - 1, 1) 
+    }));
+  }
+
   return (
     <div>
       <h1>Products</h1>
       <ul>
         {products.map(product => (
-            <li key={product.id}>
-                <div>
-                    {product.title}
-                </div>
-            </li>
+          <li key={product.id}>
+            <img src={product.imageUrl} alt={product.title} style={{ width: '100px', height: '100px' }} />
+            <p className='product-title'>{product.title}</p>
+            <p className='product-price'>${product.price}</p>
+            <div className='product-quantity'>
+                <button onClick={() => decQ(product.id)} className='less'>{'<'}</button>
+                {quantities[product.id]}
+                <button onClick={() => incQ(product.id)} className='more'>{'>'}</button>
+                <button onClick={() => addToCart(product.id)} className='addToCart'>Add to Cart</button>
+            </div>
+          </li>
         ))}
       </ul>
     </div>
