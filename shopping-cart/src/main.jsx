@@ -1,27 +1,30 @@
-import React from "react";
-import ReactDOM from "react-dom/client";
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
-import Shop from "./Shop";
-import Landing from "./Landing";
-import Cart from "./Cart"
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+import Shop from './Shop';
+import Landing from './Landing';
+import Cart from './Cart';
+import { ShoppingCartProvider } from './components/ShoppingCartProvider';
 
 const router = createBrowserRouter([
   {
-    path: "/",
+    path: '/',
     element: <Landing />,
   },
   {
-    path: "shop",
+    path: 'shop',
     element: <Shop />,
   },
   {
-    path: "cart",
-    element: <Cart/>
-  }
+    path: 'cart',
+    element: <Cart />,
+  },
 ]);
 
-ReactDOM.createRoot(document.getElementById("root")).render(
+ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <RouterProvider router={router} />
+    <ShoppingCartProvider>
+      <RouterProvider router={router} />
+    </ShoppingCartProvider>
   </React.StrictMode>
 );
