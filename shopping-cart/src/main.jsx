@@ -5,6 +5,8 @@ import Shop from './Shop';
 import Landing from './Landing';
 import Cart from './Cart';
 import { ShoppingCartProvider } from './components/ShoppingCartProvider';
+import './App.css';
+import './index.css';
 
 const router = createBrowserRouter([
   {

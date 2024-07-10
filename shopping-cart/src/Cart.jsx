@@ -7,8 +7,10 @@ const Cart = () => {
   return (
     <>
       <h1>Shopping Cart</h1>
-      <Link to="/" className="button-link">Home</Link>
-      <Link to="/shop" className="button-link">Shop</Link>
+      <div className="links">
+        <Link to="/" className="button-link">Home</Link>
+        <Link to="/shop" className="button-link">Shop</Link>
+      </div>
       <div className='cart'>
         <ul>
           {cart.map(item => (
