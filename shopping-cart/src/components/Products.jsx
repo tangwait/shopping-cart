@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useShoppingCart } from './useShoppingCart'; 
 
 const images = import.meta.glob('../assets/images/*.jpg');
 
@@ -13,6 +14,7 @@ const loadImages = async () => {
 };
 
 const Products = () => {
+  const { addToCart } = useShoppingCart(); 
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -58,23 +60,26 @@ const Products = () => {
     return <div>Error: {error.message}</div>;
   }
 
-  const addToCart = (productId) => {
-    console.log(`Product ${products.find(product => product.id === productId).title} added to cart with quantity ${quantities[productId]}`);
-  }
+  const handleAddToCart = (productId) => {
+    const product = products.find(product => product.id === productId);
+    if (product) {
+      addToCart({ ...product, quantity: quantities[productId] });
+    }
+  };
 
   const incQ = (productId) => {
     setQuantities(prevQuantities => ({
       ...prevQuantities,
       [productId]: (prevQuantities[productId] || 0) + 1
     }));
-  }
+  };
 
   const decQ = (productId) => {
     setQuantities(prevQuantities => ({
       ...prevQuantities,
-      [productId]: Math.max((prevQuantities[productId] || 1) - 1, 1) 
+      [productId]: Math.max((prevQuantities[productId] || 1) - 1, 1)
     }));
-  }
+  };
 
   return (
     <div>
@@ -86,10 +91,10 @@ const Products = () => {
             <p className='product-title'>{product.title}</p>
             <p className='product-price'>${product.price}</p>
             <div className='product-quantity'>
-                <button onClick={() => decQ(product.id)} className='less'>{'<'}</button>
-                {quantities[product.id]}
-                <button onClick={() => incQ(product.id)} className='more'>{'>'}</button>
-                <button onClick={() => addToCart(product.id)} className='addToCart'>Add to Cart</button>
+              <button onClick={() => decQ(product.id)} className='less'>{'<'}</button>
+              {quantities[product.id]}
+              <button onClick={() => incQ(product.id)} className='more'>{'>'}</button>
+              <button onClick={() => handleAddToCart(product.id)} className='addToCart'>Add to Cart</button>
             </div>
           </li>
         ))}
